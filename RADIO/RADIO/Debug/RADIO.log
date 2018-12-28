@@ -1,0 +1,11 @@
+﻿  RADIO.cpp
+c:\projects\radio\radio\radio\radio.cpp(18): warning C4244: 'initializing': conversion from 'double' to 'long', possible loss of data
+c:\projects\radio\radio\radio\radio.cpp(77): warning C4307: '*': integral constant overflow
+c:\projects\radio\radio\radio\radio.cpp(81): warning C4307: '*': integral constant overflow
+c:\projects\radio\radio\radio\radio.cpp(89): warning C4307: '*': integral constant overflow
+c:\projects\radio\radio\radio\radio.cpp(111): warning C4307: '*': integral constant overflow
+c:\projects\radio\radio\radio\radio.cpp(113): warning C4307: '*': integral constant overflow
+c:\projects\radio\radio\radio\radio.cpp(114): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+c:\projects\radio\radio\radio\radio.cpp(119): warning C4307: '*': integral constant overflow
+c:\projects\radio\radio\radio\radio.cpp(121): warning C4307: '*': integral constant overflow
+  RADIO.vcxproj -> C:\Projects\RADIO\RADIO\Debug\RADIO.exe
