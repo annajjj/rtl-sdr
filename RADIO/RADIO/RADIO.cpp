@@ -15,7 +15,7 @@
 
 using namespace std;
 
-const uint32_t SIZE = 3e5;
+const double SIZE = 3e6;
 double* ym = new double[SIZE*BWSERV / FS]; 
 
 /*class Rtl {
@@ -39,7 +39,7 @@ public:
 
 
 
-complex<double>* lowpassFilter(complex<double> data[SIZE]) {
+complex<double>* lowpassFilter(complex<double>* data) {
 	const double a[5] = { 1.0, -3.2070, 3.9205, -2.1578, 0.4502 };
 	const double b[5] = { 0.0004, 0.0015, 0.0022, 0.0015, 0.0004 };
 	static complex<double> *wideband_signal_filtered = new complex<double>[SIZE];
@@ -93,6 +93,8 @@ double* lowpassFilterCzebyshev(double* data) {
 
 int main()
 {
+	cout << sizeof(ym) << endl << SIZE * BWSERV / FS << endl;
+
 	fstream file;
 	file.open("fm_fo-104M_fs-2.48M_g-36.4.raw", std::ios::in | std::ios::out);
 
@@ -117,7 +119,8 @@ int main()
 		}
 
 		complex < double> dx;
-		double* y = new double[SIZE*BWSERV / FS];
+		cout << SIZE * BWSERV /FS;
+		double* y = new double[SIZE/ FS* BWSERV];
 
 		for (int i = 0; i < SIZE*BWSERV / FS; i++) {
 			dx = x[i + 1] * conj(x[i]);
@@ -128,15 +131,15 @@ int main()
 
 		cout << ym1[50] << endl; 
 
-		double* ym2 = new double[SIZE*BWAUDIO / FS + 1];
+		double* ym2 = new double[double(SIZE)*BWAUDIO / FS + 1];
 
-		for (int i = 0, j = 0; i < SIZE*BWAUDIO / FS + 1; i++) {
+		for (uint64_t i = 0, j = 0; i < SIZE*BWAUDIO / FS + 1; i++) {
 			j = i * BWSERV / BWAUDIO;
 			ym2[i] = ym1[j];
 		}
 
-		cout << ym2[0] << endl << ym2[1] << endl << ym2[40] << endl << SIZE * BWAUDIO / FS;
-		
+		cout << ym2[0] << endl << ym2[1] << endl << ym2[40] << endl << SIZE* BWAUDIO/FS;
+
 	}
 	else cout << "can't open file" << endl;
 
