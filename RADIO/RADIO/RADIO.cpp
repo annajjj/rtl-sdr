@@ -15,7 +15,9 @@
 
 using namespace std;
 
-const long int SIZE = 25e3;
+const uint32_t SIZE = 3e5;
+double* ym = new double[SIZE*BWSERV / FS]; 
+
 /*class Rtl {
 
 public:
@@ -36,16 +38,17 @@ public:
 };*/
 
 
+
 complex<double>* lowpassFilter(complex<double> data[SIZE]) {
 	const double a[5] = { 1.0, -3.2070, 3.9205, -2.1578, 0.4502 };
 	const double b[5] = { 0.0004, 0.0015, 0.0022, 0.0015, 0.0004 };
-	static complex<double> wideband_signal_filtered[SIZE];
+	static complex<double> *wideband_signal_filtered = new complex<double>[SIZE];
 
 	wideband_signal_filtered[0] = b[0] * data[0];
 	wideband_signal_filtered[1] = b[0] * data[1] + b[1] * data[0] - a[1] * wideband_signal_filtered[0];
 	wideband_signal_filtered[2] = b[0] * data[2] + b[1] * data[1] + b[2] * data[0] - a[1] * wideband_signal_filtered[1] - a[2] * wideband_signal_filtered[0];
 	wideband_signal_filtered[3] = b[0] * data[3] + b[1] * data[2] + b[2] * data[1] + b[3] * data[0] - a[1] * wideband_signal_filtered[2] - a[2] * wideband_signal_filtered[1] - a[3] * wideband_signal_filtered[0];
-	wideband_signal_filtered[4] = b[0] * data[4] + b[1] * data[3] + b[2] * data[2] + b[3] * data[1] +b[4]*data[0] - a[1] * wideband_signal_filtered[3] - a[2] * wideband_signal_filtered[2] - a[3] * wideband_signal_filtered[1] - a[4] * wideband_signal_filtered[0];
+	wideband_signal_filtered[4] = b[0] * data[4] + b[1] * data[3] + b[2] * data[2] + b[3] * data[1] + b[4] * data[0] - a[1] * wideband_signal_filtered[3] - a[2] * wideband_signal_filtered[2] - a[3] * wideband_signal_filtered[1] - a[4] * wideband_signal_filtered[0];
 
 	for (int i = 5; i < SIZE; i++) wideband_signal_filtered[i] = b[0] * data[i] + b[1] * data[i - 1] + b[2] * data[i - 2] + b[3] * data[i - 3] + b[4] * data[i - 4] - a[1] * wideband_signal_filtered[i - 1] - a[2] * wideband_signal_filtered[i - 2] - a[3] * wideband_signal_filtered[i - 3] - a[4] * wideband_signal_filtered[i - 4];
 
@@ -74,11 +77,9 @@ complex<double>* lowpassFilter(complex<double> data[SIZE]) {
 	return ym;
 }*/
 
-double* lowpassFilterCzebyshev(double data[SIZE*BWSERV / FS]) {
+double* lowpassFilterCzebyshev(double* data) {
 	double a[5] = { 1, -3.26190114006689, 4.11211754150723, -2.36210053054586,	0.520159946121643 };
 	double b[5] = { 0.000514269652404351,	0.00205707860961740,	0.00308561791442611,	0.00205707860961740,	0.000514269652404351 };
-
-	static double ym[SIZE*BWSERV / FS];
 
 	ym[0] = b[0] * data[0];
 	ym[1] = b[0] * data[1] + b[1] * data[0] - a[1] * ym[0];
@@ -96,27 +97,27 @@ int main()
 	file.open("fm_fo-104M_fs-2.48M_g-36.4.raw", std::ios::in | std::ios::out);
 
 	if (file.good()) {
-		char samples[2*SIZE];
-		file.read(samples, 2*SIZE);
+		char* samples = new char[2 * SIZE];
+		file.read(samples, 2 * SIZE);
 
-		complex < double> wideband_signal[SIZE];
-		for (int i = 0; i < SIZE; i++) wideband_signal[i] = complex<double>(samples[i*2], samples[i*2+1]);
+		complex < double>* wideband_signal = new complex<double>[SIZE];
+		for (int i = 0; i < SIZE; i++) wideband_signal[i] = complex<double>(samples[i * 2], samples[i * 2 + 1]);
 
-		complex < double> wideband_signal_shifted[SIZE];
+		complex < double>* wideband_signal_shifted = new complex<double>[SIZE];
 		for (int k = 0; k < SIZE; k++) wideband_signal_shifted[k] = wideband_signal[k] * exp(-2 * PI*FC / FS * k * 1i);
-		
+
 
 		complex < double>* wideband_signal_filtered = lowpassFilter(wideband_signal_shifted);
 
-		complex < double> x[SIZE*BWSERV/FS];
+		complex < double>* x = new complex<double>[SIZE*BWSERV / FS];
 
-		for (int i = 0, j=0; i < SIZE*BWSERV / FS; i++) {
+		for (int i = 0, j = 0; i < SIZE*BWSERV / FS; i++) {
 			j = round(i*(double)FS / BWSERV);
 			x[i] = wideband_signal_filtered[j];
 		}
 
 		complex < double> dx;
-		double y[SIZE*BWSERV / FS];
+		double* y = new double[SIZE*BWSERV / FS];
 
 		for (int i = 0; i < SIZE*BWSERV / FS; i++) {
 			dx = x[i + 1] * conj(x[i]);
@@ -125,13 +126,17 @@ int main()
 
 		double* ym1 = lowpassFilterCzebyshev(y);
 
-		double ym2[SIZE*BWAUDIO/FS + 1];
+		cout << ym1[50] << endl; 
 
-		for (int i = 0, j = 0; i < SIZE*BWAUDIO / FS ; i++) {
-			j = i*BWSERV/BWAUDIO;
+		double* ym2 = new double[SIZE*BWAUDIO / FS + 1];
+
+		for (int i = 0, j = 0; i < SIZE*BWAUDIO / FS + 1; i++) {
+			j = i * BWSERV / BWAUDIO;
 			ym2[i] = ym1[j];
 		}
 
+		cout << ym2[0] << endl << ym2[1] << endl << ym2[40] << endl << SIZE * BWAUDIO / FS;
+		
 	}
 	else cout << "can't open file" << endl;
 

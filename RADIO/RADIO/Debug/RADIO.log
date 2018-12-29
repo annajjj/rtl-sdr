@@ -1,11 +1,13 @@
 ﻿  RADIO.cpp
-c:\projects\radio\radio\radio\radio.cpp(18): warning C4244: 'initializing': conversion from 'double' to 'long', possible loss of data
-c:\projects\radio\radio\radio\radio.cpp(77): warning C4307: '*': integral constant overflow
-c:\projects\radio\radio\radio\radio.cpp(81): warning C4307: '*': integral constant overflow
-c:\projects\radio\radio\radio\radio.cpp(89): warning C4307: '*': integral constant overflow
-c:\projects\radio\radio\radio\radio.cpp(111): warning C4307: '*': integral constant overflow
-c:\projects\radio\radio\radio\radio.cpp(113): warning C4307: '*': integral constant overflow
-c:\projects\radio\radio\radio\radio.cpp(114): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
-c:\projects\radio\radio\radio\radio.cpp(119): warning C4307: '*': integral constant overflow
-c:\projects\radio\radio\radio\radio.cpp(121): warning C4307: '*': integral constant overflow
-  RADIO.vcxproj -> C:\Projects\RADIO\RADIO\Debug\RADIO.exe
+q:\c++\rtl-sdr\radio\radio\radio.cpp(18): warning C4244: "inicjowanie": konwersja z "double" do "uint32_t", możliwa utrata danych
+q:\c++\rtl-sdr\radio\radio\radio.cpp(19): warning C4307: "*": przepełnienie stałej całkowitej
+q:\c++\rtl-sdr\radio\radio\radio.cpp(90): warning C4307: "*": przepełnienie stałej całkowitej
+q:\c++\rtl-sdr\radio\radio\radio.cpp(112): warning C4307: "*": przepełnienie stałej całkowitej
+q:\c++\rtl-sdr\radio\radio\radio.cpp(114): warning C4307: "*": przepełnienie stałej całkowitej
+q:\c++\rtl-sdr\radio\radio\radio.cpp(115): warning C4244: "=": konwersja z "double" do "int", możliwa utrata danych
+q:\c++\rtl-sdr\radio\radio\radio.cpp(120): warning C4307: "*": przepełnienie stałej całkowitej
+q:\c++\rtl-sdr\radio\radio\radio.cpp(122): warning C4307: "*": przepełnienie stałej całkowitej
+q:\c++\rtl-sdr\radio\radio\radio.cpp(131): warning C4307: "*": przepełnienie stałej całkowitej
+q:\c++\rtl-sdr\radio\radio\radio.cpp(133): warning C4307: "*": przepełnienie stałej całkowitej
+q:\c++\rtl-sdr\radio\radio\radio.cpp(138): warning C4307: "*": przepełnienie stałej całkowitej
+  RADIO.vcxproj -> Q:\c++\rtl-sdr\RADIO\Debug\RADIO.exe
