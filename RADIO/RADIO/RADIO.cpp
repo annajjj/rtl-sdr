@@ -28,8 +28,8 @@ sf::Int16* tempZeros = new sf::Int16[BUFF_SIZE];
 //alokacje pamiêci
 char* samples = new char[2 * SIZE];
 complex < double>* wideband_signal = new complex<double>[SIZE];
-//complex < double>* wideband_signal_shifted = new complex<double>[SIZE];
-complex < double>* x = new complex<double>[SIZE*BWSERV / FS];
+complex < double>* wideband_signal_shifted = new complex<double>[SIZE];
+//complex < double>* x = new complex<double>[SIZE*BWSERV / FS];
 complex < double> dx;
 double* y = new double[SIZE / FS* BWSERV];
 double* ym2 = new double[double(SIZE)*BWAUDIO / FS + 1];
