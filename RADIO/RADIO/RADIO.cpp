@@ -35,6 +35,37 @@ sf::Int16* raw = new sf::Int16[BUFF_SIZE];
 complex<double> y_b1[10];
 double y_b2[14];
 
+//PLL
+double f_pilot = 19000;
+const double b_pilot[10] = { 0, -0.00164198190541088, -0.0101184457883958, -0.0275849619486905, -0.0466555376128923, -0.0476648940777955, -0.00866486680067846,	0.0742874803336435,	0.173957680307199,	0.242528331270080 };
+double* pilotREC = new double[SIZE*BWSERV / FS];
+
+double freq = 2 * PI * f_pilot / BWSERV;
+double*  theta = new double[SIZE*BWSERV / FS + 1];
+const double alpha = 1e-2;
+const double beta = alpha * alpha / 4;
+
+double* esrlup = new double[SIZE*BWSERV / FS];
+double* esrl = new double[SIZE*BWAUDIO / FS];
+sf::Int16* esl = new sf::Int16[SIZE*BWAUDIO / FS];
+sf::Int16* esr = new sf::Int16[SIZE*BWAUDIO / FS];
+double perr;
+
+
+// int tableSize should we convert double to int???
+void SetBeginingBuffor(double* table, int count, int tableSize) {
+	for (int i = 0; i < count; i++) table[i] = table[tableSize - count + i];
+}
+
+void SetBufforZeros(double* table, int count) {
+	for (int i = 0; i < count; i++) table[i] = 0;
+}
+
+void SetVariables() {
+	theta[0] = 0;
+	SetBufforZeros(pilotREC, 19);
+	SetBufforZeros(esrlup, 20);
+}
 
 void ReadSamples() {
 	file.read(samples, 2 * SIZE);
@@ -76,37 +107,25 @@ void Mono() {
 		ym[i] = (b2[0] * (y[j] + y[j - 8]) + b2[1] * (y[j - 1] + y[j - 7]) + b2[2] * (y[j - 2] + y[j - 6]) + b2[3] * (y[j - 3] + y[j - 5]) + b2[4] * y[j - 4]);
 	}
 }
-//gprof linux profiler
 
-double f_pilot = 19000;
-const double b_pilot[10] = { 0, -0.00164198190541088, -0.0101184457883958, -0.0275849619486905, -0.0466555376128923, -0.0476648940777955, -0.00866486680067846,	0.0742874803336435,	0.173957680307199,	0.242528331270080 };
-double* pilotREC = new double[SIZE*BWSERV / FS];
 
-double freq = 2 * PI * f_pilot / BWSERV;
-double*  theta = new double[SIZE*BWSERV / FS + 1];
-const double alpha = 1e-2;
-const double beta = alpha * alpha / 4;
-
-double* esrlup = new double[SIZE*BWSERV / FS];
-double* esrl = new double[SIZE*BWAUDIO / FS];
-sf::Int16* esl = new sf::Int16[SIZE*BWAUDIO / FS];
-sf::Int16* esr = new sf::Int16[SIZE*BWAUDIO / FS];
 
 //PLL
 void PilotReconstruction() {
-	theta[0] = 0;
-	for (int i = 0; i < 19; i++) pilotREC[i] = y[i];
 	for (uint64_t i = 19, j = 0; i < SIZE*BWSERV / FS; i++) {
 		pilotREC[i] = b_pilot[0] * (y[i] + y[i - 19]) + b_pilot[1] * (y[i - 1] + y[i - 18]) + b_pilot[2] * (y[i - 2] + y[i - 17]) + b_pilot[3] * (y[i - 3] + y[i - 16]) + b_pilot[4] * (y[i - 4] + y[i - 15]) + b_pilot[5] * (y[i - 5] + y[i - 14]) + b_pilot[6] * (y[i - 6] + y[i - 13]) + b_pilot[7] * (y[i - 7] + y[i - 12]) + b_pilot[8] * (y[i - 8] + y[i - 11]) + b_pilot[9] * (y[i - 9] + y[i - 10]);
 	}
 
+
 	//PLL
-	double perr;
+	
 	for (int i = 0; i < SIZE*BWSERV / FS; i++) {
 		perr = -pilotREC[i] * sin(theta[i]);
 		theta[i + 1] = theta[i] + freq + alpha*perr;
 		freq = freq + beta*perr;
 	}
+	
+	SetBeginingBuffor(pilotREC, 19, SIZE*BWSERV / FS);
 }
 
 //pll theta ostatnia jest pierwsza nastepnego pierwsze elementy filtru to ostatnie :3
@@ -115,13 +134,14 @@ const double hLP[10] = { 0,	0.000809467721695811,	0.00404453781854362,	0.0113897
 const double hBP[10] = { 0, -0.000119057799757280,	0.00612314062564759,	0.0222187747664582,	0.0199368390682425, -0.0437792502661133, -0.137841764773162, -0.132216695745961,	0.0404202524384409,	0.234133430242033 }; // band pass
 
 void LmRreconstruction() {
-	esrlup[0] = 0;
-	for (int i = 1; i < 19; i++) esrlup[i] = y[i];
 	for (uint64_t i = 19, j = 0; i < SIZE*BWSERV / FS; i++) {
 		esrlup[i] = hBP[0] * (y[i] + y[i - 19]) + hBP[1] * (y[i - 1] + y[i - 18]) + hBP[2] * (y[i - 2] + y[i - 17]) + hBP[3] * (y[i - 3] + y[i - 16]) + hBP[4] * (y[i - 4] + y[i - 15]) + hBP[5] * (y[i - 5] + y[i - 14]) + hBP[6] * (y[i - 6] + y[i - 13]) + hBP[7] * (y[i - 7] + y[i - 12]) + hBP[8] * (y[i - 8] + y[i - 11]) + hBP[9] * (y[i - 9] + y[i - 10]);
 	}
 
+
 	for (int i = 0; i< SIZE*BWSERV / FS; i++) esrlup[i] = 2 * esrlup[i] * cos(2 * theta[i + 1]);
+	//set first new theta value 
+	theta[0] = theta[int(SIZE*BWSERV / FS)];
 
 	for (int i = 0; i < 2; i++) esrl[i] = esrlup[i];
 	for (uint64_t i = 2, j = 0; i < SIZE*BWAUDIO / FS; i++) {
@@ -131,11 +151,15 @@ void LmRreconstruction() {
 		esl[i] = 10000 * (ym[i] + esrl[i]) / 2;
 		esr[i] = 10000 * (ym[i] - esrl[i]) / 2;
 	}
+
+	SetBeginingBuffor(esrlup, 20, SIZE*BWSERV / FS);
 }
 
 
 sf::Int16* getNextPortionOfData()
 {
+	SetVariables();
+
 	ReadSamples();
 
 	SamplesToComplex();
