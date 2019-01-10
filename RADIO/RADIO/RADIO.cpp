@@ -1,5 +1,3 @@
-// RADIO.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
 #include <iostream>
 #include <string>
 #include <fstream>
@@ -16,9 +14,9 @@
 
 using namespace std;
 
-const double SIZE = 5e6;
-const int BUFF_SIZE = SIZE*BWAUDIO / FS + 1;
-sf::Int16* ym = new sf::Int16[SIZE*BWAUDIO / FS + 1];
+const double SIZE = 2e6;
+const int BUFF_SIZE = SIZE*BWAUDIO / FS;
+double* ym = new double[SIZE*BWAUDIO / FS + 1];
 fstream file;
 sf::Int16* tempSamples = new sf::Int16[BUFF_SIZE];
 sf::Int16* tempSamples2 = new sf::Int16[BUFF_SIZE];
@@ -27,119 +25,135 @@ bool isTempSamplesLoaded2 = false;
 bool isTempSamplesLoaded = false;
 sf::Int16* tempZeros = new sf::Int16[10];
 
-//alokacje pamiêci
 char* samples = new char[2 * SIZE];
 complex < double>* wideband_signal = new complex<double>[SIZE];
 complex < double>* wideband_signal_shifted = new complex<double>[SIZE];
-//complex < double>* x = new complex<double>[SIZE*BWSERV / FS];
 complex < double> dx;
 double* y = new double[SIZE / FS* BWSERV];
-//sf::Int16* ym2 = new sf::Int16[SIZE*BWAUDIO / FS + 1];
 complex<double> *wideband_signal_filtered = new complex<double>[SIZE*BWSERV / FS];
 sf::Int16* raw = new sf::Int16[BUFF_SIZE];
-
-//const double b1[6] = { 0.0102416486969833,	0.0252210246018771,	0.0672142705568179,	0.124880958451606,	0.175013354121922,	0.194857487141587 };
-const double b1[5] = { 0.0146377165290559,	0.0441755395501676,	0.120381320135061,	0.202164446782920,	0.237281954005590 };
-//const double b2[8] = { 0.00178204928431725,	0.00602911430737609,	0.0190628591984030,	0.0445805568328161,	0.0806047125159429,	0.119109490298634,	0.148826058465054,	0.160010318194913 };
-const double b2[5] = { 0.0166686694468294,	0.0468703455665084,	0.121783755139877,	0.198963250023160,	0.231427959647251 };
 complex<double> y_b1[10];
 double y_b2[14];
 
-complex<double>* lowpassFilter(complex<double>* data) {
-	const double a[5] = { 1.0, -3.2070, 3.9205, -2.1578, 0.4502 };
-	const double b[5] = { 0.0004, 0.0015, 0.0022, 0.0015, 0.0004 };
 
-	// wiem wiem glupio wyglda ale to siê moze przydaæ 
-	y_b1[0] = b1[0] * data[0];
-	/*y_b1[1] = b1[0] * data[1] + b1[1] * data[0];
-	y_b1[2] = b1[0] * data[2] + b1[1] * data[1] + b1[2] * data[0];
-	y_b1[3] = b1[0] * data[3] + b1[1] * data[2] + b1[2] * data[1] + b1[3] * data[0];
-	y_b1[4] = b1[0] * data[4] + b1[1] * data[3] + b1[2] * data[2] + b1[3] * data[1] + b1[4] * data[0];
-	y_b1[5] = b1[0] * data[5] + b1[1] * data[4] + b1[2] * data[3] + b1[3] * data[2] + b1[4] * data[1] + b1[5] * data[0];
-	y_b1[6] = b1[0] * data[6] + b1[1] * data[5] + b1[2] * data[4] + b1[3] * data[3] + b1[4] * (data[2] + data[0]) + b1[5] * data[1];
-	y_b1[7] = b1[0] * data[7] + b1[1] * data[6] + b1[2] * data[5] + b1[3] * (data[4] + data[0]) + b1[4] * (data[3] + data[1]) + b1[5] * data[2];*/
-
-
-
-	wideband_signal_filtered[0] = y_b1[0];
-
-	// do pêtli, nie i++ i j+ tyle ile trzeba ¿eby by³o od razu podpróbkowanie 
-	for (uint64_t i = 1, j = 0; i < SIZE*BWSERV / FS; i++) {
-		j = round(i*(double)FS / BWSERV);
-		wideband_signal_filtered[i] = b1[0] * (data[j] + data[j - 8]) + b1[1] * (data[j - 1] + data[j - 7]) + b1[2] * (data[j - 2] + data[j - 6]) + b1[3] * (data[j - 3] + data[j - 5]) + b1[4] * data[j - 4];
-	}
-
-
-	/////////////////////////////
-	/*
-	wideband_signal_filtered[0] = b[0] * data[0];
-	wideband_signal_filtered[1] = b[0] * data[1] + b[1] * data[0] - a[1] * wideband_signal_filtered[0];
-	wideband_signal_filtered[2] = b[0] * data[2] + b[1] * data[1] + b[2] * data[0] - a[1] * wideband_signal_filtered[1] - a[2] * wideband_signal_filtered[0];
-	wideband_signal_filtered[3] = b[0] * data[3] + b[1] * data[2] + b[2] * data[1] + b[3] * data[0] - a[1] * wideband_signal_filtered[2] - a[2] * wideband_signal_filtered[1] - a[3] * wideband_signal_filtered[0];
-	wideband_signal_filtered[4] = b[0] * data[4] + b[1] * data[3] + b[2] * data[2] + b[3] * data[1] + b[4] * data[0] - a[1] * wideband_signal_filtered[3] - a[2] * wideband_signal_filtered[2] - a[3] * wideband_signal_filtered[1] - a[4] * wideband_signal_filtered[0];
-
-
-	//policzyæ wszystkie, potem pêtla i podprobkowac najpierw te pierwsze co ileœ apotem druga pêtla koleje juz dobrze liczone !!!!!!!!!!!!!!!!!!
-	for (int i = 5; i < SIZE; i++) wideband_signal_filtered[i] = b[0] * data[i] + b[1] * data[i - 1] + b[2] * data[i - 2] + b[3] * data[i - 3] + b[4] * data[i - 4] - a[1] * wideband_signal_filtered[i - 1] - a[2] * wideband_signal_filtered[i - 2] - a[3] * wideband_signal_filtered[i - 3] - a[4] * wideband_signal_filtered[i - 4];
-	*/
-	return wideband_signal_filtered;
-}
-
-sf::Int16* lowpassFilterCzebyshev(double* data) {
-	//double a[5] = { 1, -3.26190114006689, 4.11211754150723, -2.36210053054586,	0.520159946121643 };
-	//double b[5] = { 0.000514269652404351,	0.00205707860961740,	0.00308561791442611,	0.00205707860961740,	0.000514269652404351 };
-
-	/*zmien na b2 i wideband_signal filtered
-	wideband_signal_filtered[0] = b1[0] * data[0];
-	wideband_signal_filtered[1] = b1[0] * data[1] + b1[1] * data[0];
-	wideband_signal_filtered[2] = b1[0] * data[2] + b1[1] * data[1] + b1[2] * data[0];
-	wideband_signal_filtered[3] = b1[0] * data[3] + b1[1] * data[2] + b1[2] * data[1] + b1[3] * data[0];
-	wideband_signal_filtered[4] = b1[0] * data[4] + b1[1] * data[3] + b1[2] * data[2] + b1[3] * data[1] + b1[4] * data[0];
-	wideband_signal_filtered[5] = b1[0] * data[5] + b1[1] * data[4] + b1[2] * data[3] + b1[3] * data[2] + b1[4] * data[1] + b1[5] * data[0];
-	wideband_signal_filtered[6] = b1[0] * data[6] + b1[1] * data[5] + b1[2] * data[4] + b1[3] * data[3] + b1[4] * data[2] + b1[5] * data[1] + b[6] * data[0];
-	wideband_signal_filtered[7] = b1[0] * data[7] + b1[1] * data[6] + b1[2] * data[5] + b1[3] * data[4] + b1[4] * data[3] + b1[5] * (data[2] + data[0]) + b2[6] * data[1];
-	*/
-
-	y_b2[0] = b2[0] * data[0];
-
-
-	/*
-	ym[0] = b[0] * data[0];
-	ym[1] = b[0] * data[1] + b[1] * data[0] - a[1] * ym[0];
-	ym[2] = b[0] * data[2] + b[1] * data[1] + b[2] * data[0] - a[1] * ym[1] - a[2] * ym[0];
-	ym[3] = b[0] * data[3] + b[1] * data[2] + b[2] * data[1] + b[3] * data[0] - a[1] * ym[2] - a[2] * ym[1] - a[3] * ym[0];
-	ym[4] = b[0] * data[4] + b[1] * data[3] + b[2] * data[2] + b[3] * data[1] + b[4] * data[0] - a[1] * ym[3] - a[2] * ym[2] - a[3] * ym[1] - a[4] * ym[0];
-	*/
-	ym[0] = 10000*y_b2[0];
-	for (uint64_t i = 1, j = 0; i < SIZE*BWAUDIO / FS + 1; i++) {
-		j = i * BWSERV / BWAUDIO;
-		//10000 razy bo to od razu zwraca probki do sfml
-		ym[i] = 10000*(b2[0] * (data[j] + data[j - 8]) + b2[1] * (data[j - 1] + data[j - 7]) + b2[2] * (data[j - 2] + data[j - 6]) + b2[3] * (data[j - 3] + data[j - 5]) + b2[4] * data[j - 4]);
-	}
-	return ym;
-}
-
-sf::Int16* getNextPortionOfData()
-{
+void ReadSamples() {
 	file.read(samples, 2 * SIZE);
+}
 
+
+void SamplesToComplex() {
 	for (int i = 0; i < SIZE; i++) wideband_signal[i] = complex<double>(samples[i * 2], samples[i * 2 + 1]);
+}
 
+void ShiftToBaseband() {
 	for (int k = 0; k < SIZE; k++) wideband_signal_shifted[k] = wideband_signal[k] * exp(-2 * PI*FC / FS * k * 1i);
+}
 
+const double b1[5] = { 0.0146377165290559,	0.0441755395501676,	0.120381320135061,	0.202164446782920,	0.237281954005590 };
 
-	complex < double>* wideband_signal_filtered = lowpassFilter(wideband_signal_shifted);
+void LowpassFilter() {
+	wideband_signal_filtered[0] = b1[0] * wideband_signal_shifted[0];
 
+	for (uint64_t i = 1, j = 0; i < SIZE*BWSERV / FS; i++) {
+		j = round(i*(double)FS / BWSERV) - 1;
+		wideband_signal_filtered[i] = b1[0] * (wideband_signal_shifted[j] + wideband_signal_shifted[j - 8]) + b1[1] * (wideband_signal_shifted[j - 1] + wideband_signal_shifted[j - 7]) + b1[2] * (wideband_signal_shifted[j - 2] + wideband_signal_shifted[j - 6]) + b1[3] * (wideband_signal_shifted[j - 3] + wideband_signal_shifted[j - 5]) + b1[4] * wideband_signal_shifted[j - 4];
+	}
+}
 
-
+void DemodulationFM() {
 	for (int i = 0; i < SIZE*BWSERV / FS; i++) {
 		dx = wideband_signal_filtered[i + 1] * conj(wideband_signal_filtered[i]);
 		y[i] = atan2(dx.imag(), dx.real());
 	}
+}
 
-	//nie wiem czy rzutowanie nie opoznia tego, todo
-	raw = (sf::Int16*)lowpassFilterCzebyshev(y);
+const double b2[5] = { 0.0166686694468294,	0.0468703455665084,	0.121783755139877,	0.198963250023160,	0.231427959647251 };
 
+void Mono() {
+	ym[0] = b2[0] * y[0];
+	for (uint64_t i = 1, j = 0; i < SIZE*BWAUDIO / FS + 1; i++) {
+		j = i * BWSERV / BWAUDIO - 1;
+		ym[i] = (b2[0] * (y[j] + y[j - 8]) + b2[1] * (y[j - 1] + y[j - 7]) + b2[2] * (y[j - 2] + y[j - 6]) + b2[3] * (y[j - 3] + y[j - 5]) + b2[4] * y[j - 4]);
+	}
+}
+//gprof linux profiler
+
+double f_pilot = 19000;
+const double b_pilot[10] = { 0, -0.00164198190541088, -0.0101184457883958, -0.0275849619486905, -0.0466555376128923, -0.0476648940777955, -0.00866486680067846,	0.0742874803336435,	0.173957680307199,	0.242528331270080 };
+double* pilotREC = new double[SIZE*BWSERV / FS];
+
+double freq = 2 * PI * f_pilot / BWSERV;
+double*  theta = new double[SIZE*BWSERV / FS + 1];
+const double alpha = 1e-2;
+const double beta = alpha * alpha / 4;
+
+double* esrlup = new double[SIZE*BWSERV / FS];
+double* esrl = new double[SIZE*BWAUDIO / FS];
+sf::Int16* esl = new sf::Int16[SIZE*BWAUDIO / FS];
+sf::Int16* esr = new sf::Int16[SIZE*BWAUDIO / FS];
+
+//PLL
+void PilotReconstruction() {
+	theta[0] = 0;
+	for (int i = 0; i < 19; i++) pilotREC[i] = y[i];
+	for (uint64_t i = 19, j = 0; i < SIZE*BWSERV / FS; i++) {
+		pilotREC[i] = b_pilot[0] * (y[i] + y[i - 19]) + b_pilot[1] * (y[i - 1] + y[i - 18]) + b_pilot[2] * (y[i - 2] + y[i - 17]) + b_pilot[3] * (y[i - 3] + y[i - 16]) + b_pilot[4] * (y[i - 4] + y[i - 15]) + b_pilot[5] * (y[i - 5] + y[i - 14]) + b_pilot[6] * (y[i - 6] + y[i - 13]) + b_pilot[7] * (y[i - 7] + y[i - 12]) + b_pilot[8] * (y[i - 8] + y[i - 11]) + b_pilot[9] * (y[i - 9] + y[i - 10]);
+	}
+
+	//PLL
+	double perr;
+	for (int i = 0; i < SIZE*BWSERV / FS; i++) {
+		perr = -pilotREC[i] * sin(theta[i]);
+		theta[i + 1] = theta[i] + freq + alpha*perr;
+		freq = freq + beta*perr;
+	}
+}
+
+//pll theta ostatnia jest pierwsza nastepnego pierwsze elementy filtru to ostatnie :3
+
+const double hLP[10] = { 0,	0.000809467721695811,	0.00404453781854362,	0.0113897239835690,	0.0246066750731956,	0.0444243866844004,	0.0694655711274116,	0.0959040257742370,	0.118252426340399,	0.131103185476548 }; // low pass 
+const double hBP[10] = { 0, -0.000119057799757280,	0.00612314062564759,	0.0222187747664582,	0.0199368390682425, -0.0437792502661133, -0.137841764773162, -0.132216695745961,	0.0404202524384409,	0.234133430242033 }; // band pass
+
+void LmRreconstruction() {
+	esrlup[0] = 0;
+	for (int i = 1; i < 19; i++) esrlup[i] = y[i];
+	for (uint64_t i = 19, j = 0; i < SIZE*BWSERV / FS; i++) {
+		esrlup[i] = hBP[0] * (y[i] + y[i - 19]) + hBP[1] * (y[i - 1] + y[i - 18]) + hBP[2] * (y[i - 2] + y[i - 17]) + hBP[3] * (y[i - 3] + y[i - 16]) + hBP[4] * (y[i - 4] + y[i - 15]) + hBP[5] * (y[i - 5] + y[i - 14]) + hBP[6] * (y[i - 6] + y[i - 13]) + hBP[7] * (y[i - 7] + y[i - 12]) + hBP[8] * (y[i - 8] + y[i - 11]) + hBP[9] * (y[i - 9] + y[i - 10]);
+	}
+
+	for (int i = 0; i< SIZE*BWSERV / FS; i++) esrlup[i] = 2 * esrlup[i] * cos(2 * theta[i + 1]);
+
+	for (int i = 0; i < 2; i++) esrl[i] = esrlup[i];
+	for (uint64_t i = 2, j = 0; i < SIZE*BWAUDIO / FS; i++) {
+		j = i * BWSERV / BWAUDIO - 1;
+		esrl[i] = hLP[0] * (esrlup[j] + esrlup[j - 19]) + hLP[1] * (esrlup[j - 1] + esrlup[j - 18]) + hLP[2] * (esrlup[j - 2] + esrlup[j - 17]) + hLP[3] * (esrlup[j - 3] + esrlup[j - 16]) + hLP[4] * (esrlup[j - 4] + esrlup[j - 15]) + hLP[5] * (esrlup[j - 5] + esrlup[j - 14]) + hLP[6] * (esrlup[j - 6] + esrlup[j - 13]) + hLP[7] * (esrlup[j - 7] + esrlup[j - 12]) + hLP[8] * (esrlup[j - 8] + esrlup[j - 11]) + hLP[9] * (esrlup[j - 9] + esrlup[j - 10]);
+		//10000 razy bo to od razu zwraca probki do sfml
+		esl[i] = 10000 * (ym[i] + esrl[i]) / 2;
+		esr[i] = 10000 * (ym[i] - esrl[i]) / 2;
+	}
+}
+
+
+sf::Int16* getNextPortionOfData()
+{
+	ReadSamples();
+
+	SamplesToComplex();
+
+	ShiftToBaseband();
+
+	LowpassFilter();
+
+	DemodulationFM();
+
+	Mono();
+
+	PilotReconstruction();
+
+	LmRreconstruction();
+
+	//raw = ym;	//mono
+	raw = esr; //esl or esr
 	if (file.eof()) return NULL;
 	return raw;
 }
