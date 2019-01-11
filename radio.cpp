@@ -51,6 +51,13 @@ sf::Int16* esl = new sf::Int16[SIZE*BWAUDIO / FS];
 sf::Int16* esr = new sf::Int16[SIZE*BWAUDIO / FS];
 double perr;
 
+uint64_t fi = 0;
+complex<double> expValue[2*PI*FS];
+void expArrayInit() {
+	for (int p=0;  fi< 2*PI; fi+=1.0/FS, p++){
+	    expValue[p] = exp(-2 * PI / FS * 1i);
+	}
+}
 
 // int tableSize should we convert double to int???
 void SetBeginingBuffor(double* table, int count, int tableSize) {
@@ -62,6 +69,7 @@ void SetBufforZeros(double* table, int count) {
 }
 
 void SetVariables() {
+    expArrayInit();
 	theta[0] = 0;
 	SetBufforZeros(pilotREC, 19);
 	SetBufforZeros(esrlup, 20);
@@ -77,7 +85,7 @@ void SamplesToComplex() {
 }
 
 void ShiftToBaseband() {
-	for (int k = 0; k < SIZE; k++) wideband_signal_shifted[k] = wideband_signal[k] * exp(-2 * PI*FC / FS * k * 1i);
+	for (int k = 0; k < SIZE; k++) wideband_signal_shifted[k] = wideband_signal[k] * expValue[(k*FC)%(2*PI*FS)];
 }
 
 const double b1[5] = { 0.0146377165290559,	0.0441755395501676,	0.120381320135061,	0.202164446782920,	0.237281954005590 };
