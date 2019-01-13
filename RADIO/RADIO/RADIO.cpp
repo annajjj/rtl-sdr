@@ -7,8 +7,10 @@
 
 
 #define PI 3.14159265359
-#define FS  2480000
-#define FC 103900000
+//#define FS  2480000
+//#define FC 103900000
+#define FS 1200000
+#define FC 104100000
 #define BWSERV 256000
 #define BWAUDIO 16000
 
@@ -51,6 +53,26 @@ sf::Int16* esl = new sf::Int16[SIZE*BWAUDIO / FS];
 sf::Int16* esr = new sf::Int16[SIZE*BWAUDIO / FS];
 double perr;
 
+uint64_t fi = 0;
+complex<double>* expValue = new complex<double>[FS];
+void expArrayInit() {
+	double arg = 0;
+	for (int p = 0; p < FS; p++) {
+		arg = 1.0 * p / FC;
+		expValue[p] = exp(-2 * PI * FC * arg / FS * 1i);
+		
+	}
+}
+
+complex<double> EXP(complex<double> x) {
+	x = 1.0 + x / 1048576.0;
+	x *= x; x *= x; x *= x; x *= x;
+	x *= x; x *= x; x *= x; x *= x;
+	x *= x; x *= x; x *= x; x *= x;
+	x *= x; x *= x; x *= x; x *= x;
+	x *= x; x *= x; x *= x; x *= x;
+	return x;
+}
 
 // int tableSize should we convert double to int???
 void SetBeginingBuffor(double* table, int count, int tableSize) {
@@ -62,6 +84,7 @@ void SetBufforZeros(double* table, int count) {
 }
 
 void SetVariables() {
+	expArrayInit();
 	theta[0] = 0;
 	SetBufforZeros(pilotREC, 19);
 	SetBufforZeros(esrlup, 20);
@@ -77,7 +100,12 @@ void SamplesToComplex() {
 }
 
 void ShiftToBaseband() {
-	for (int k = 0; k < SIZE; k++) wideband_signal_shifted[k] = wideband_signal[k] * exp(-2 * PI*FC / FS * k * 1i);
+	for (int k = 0; k < SIZE; fi++, k++) {
+		//wideband_signal_shifted[k] = wideband_signal[k] * (cos(2 * PI*FC / FS * k) - 1i*sin(2 * PI*FC / FS * k));
+		//cout << expValue[(fi*FC) % FS] << "   " << exp(-2 * PI*FC / FS * k * 1i) << endl;
+		//cout << (fi*FC) % FS << endl;
+		wideband_signal_shifted[k] = wideband_signal[k] * expValue[(fi*FC)%FS];
+	}
 }
 
 const double b1[5] = { 0.0146377165290559,	0.0441755395501676,	0.120381320135061,	0.202164446782920,	0.237281954005590 };
@@ -89,6 +117,7 @@ void LowpassFilter() {
 		j = round(i*(double)FS / BWSERV) - 1;
 		wideband_signal_filtered[i] = b1[0] * (wideband_signal_shifted[j] + wideband_signal_shifted[j - 8]) + b1[1] * (wideband_signal_shifted[j - 1] + wideband_signal_shifted[j - 7]) + b1[2] * (wideband_signal_shifted[j - 2] + wideband_signal_shifted[j - 6]) + b1[3] * (wideband_signal_shifted[j - 3] + wideband_signal_shifted[j - 5]) + b1[4] * wideband_signal_shifted[j - 4];
 	}
+
 }
 
 void DemodulationFM() {
@@ -109,7 +138,6 @@ void Mono() {
 }
 
 
-
 //PLL
 void PilotReconstruction() {
 	for (uint64_t i = 19, j = 0; i < SIZE*BWSERV / FS; i++) {
@@ -118,13 +146,13 @@ void PilotReconstruction() {
 
 
 	//PLL
-	
+
 	for (int i = 0; i < SIZE*BWSERV / FS; i++) {
 		perr = -pilotREC[i] * sin(theta[i]);
 		theta[i + 1] = theta[i] + freq + alpha*perr;
 		freq = freq + beta*perr;
 	}
-	
+
 	SetBeginingBuffor(pilotREC, 19, SIZE*BWSERV / FS);
 }
 
@@ -146,20 +174,18 @@ void LmRreconstruction() {
 	for (int i = 0; i < 2; i++) esrl[i] = esrlup[i];
 	for (uint64_t i = 2, j = 0; i < SIZE*BWAUDIO / FS; i++) {
 		j = i * BWSERV / BWAUDIO - 1;
+		// zmiec na to potem, krótszy filt ten sam co w mono//esrl[i] = (b2[0] * (esrlup[j] + esrlup[j - 8]) + b2[1] * (esrlup[j - 1] + esrlup[j - 7]) + b2[2] * (esrlup[j - 2] + esrlup[j - 6]) + b2[3] * (esrlup[j - 3] + esrlup[j - 5]) + b2[4] * esrlup[j - 4]);
 		esrl[i] = hLP[0] * (esrlup[j] + esrlup[j - 19]) + hLP[1] * (esrlup[j - 1] + esrlup[j - 18]) + hLP[2] * (esrlup[j - 2] + esrlup[j - 17]) + hLP[3] * (esrlup[j - 3] + esrlup[j - 16]) + hLP[4] * (esrlup[j - 4] + esrlup[j - 15]) + hLP[5] * (esrlup[j - 5] + esrlup[j - 14]) + hLP[6] * (esrlup[j - 6] + esrlup[j - 13]) + hLP[7] * (esrlup[j - 7] + esrlup[j - 12]) + hLP[8] * (esrlup[j - 8] + esrlup[j - 11]) + hLP[9] * (esrlup[j - 9] + esrlup[j - 10]);
 		//10000 razy bo to od razu zwraca probki do sfml
 		esl[i] = 10000 * (ym[i] + esrl[i]) / 2;
 		esr[i] = 10000 * (ym[i] - esrl[i]) / 2;
 	}
-
-	SetBeginingBuffor(esrlup, 20, SIZE*BWSERV / FS);
+	SetBeginingBuffor(esrlup, /*tu bêdzie rz¹d filtra z mono*/20, SIZE*BWSERV / FS);
 }
 
 
 sf::Int16* getNextPortionOfData()
 {
-	SetVariables();
-
 	ReadSamples();
 
 	SamplesToComplex();
@@ -225,7 +251,9 @@ private:
 
 int main()
 {
-	file.open("fm_fo-104M_fs-2.48M_g-36.4.raw", std::ios::in | std::ios::out);
+	SetVariables();
+
+	file.open("fm_fo-104.4M_fs-1.2M_g-36.4.raw", std::ios::in | std::ios::out);
 
 	if (file.good()) {
 

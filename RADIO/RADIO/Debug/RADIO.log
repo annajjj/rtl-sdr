@@ -1,23 +1,23 @@
 ﻿  RADIO.cpp
-q:\c++\rtl-sdr\radio\radio\radio.cpp(18): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
-q:\c++\rtl-sdr\radio\radio\radio.cpp(19): warning C4244: 'initializing': conversion from 'double' to 'unsigned int', possible loss of data
-q:\c++\rtl-sdr\radio\radio\radio.cpp(28): warning C4244: 'initializing': conversion from 'double' to 'unsigned int', possible loss of data
-q:\c++\rtl-sdr\radio\radio\radio.cpp(29): warning C4244: 'initializing': conversion from 'const double' to 'unsigned int', possible loss of data
-q:\c++\rtl-sdr\radio\radio\radio.cpp(30): warning C4244: 'initializing': conversion from 'const double' to 'unsigned int', possible loss of data
-q:\c++\rtl-sdr\radio\radio\radio.cpp(32): warning C4244: 'initializing': conversion from 'double' to 'unsigned int', possible loss of data
-q:\c++\rtl-sdr\radio\radio\radio.cpp(33): warning C4244: 'initializing': conversion from 'double' to 'unsigned int', possible loss of data
-q:\c++\rtl-sdr\radio\radio\radio.cpp(41): warning C4244: 'initializing': conversion from 'double' to 'unsigned int', possible loss of data
-q:\c++\rtl-sdr\radio\radio\radio.cpp(44): warning C4244: 'initializing': conversion from 'double' to 'unsigned int', possible loss of data
-q:\c++\rtl-sdr\radio\radio\radio.cpp(48): warning C4244: 'initializing': conversion from 'double' to 'unsigned int', possible loss of data
-q:\c++\rtl-sdr\radio\radio\radio.cpp(49): warning C4244: 'initializing': conversion from 'double' to 'unsigned int', possible loss of data
+q:\c++\rtl-sdr\radio\radio\radio.cpp(20): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+q:\c++\rtl-sdr\radio\radio\radio.cpp(21): warning C4244: 'initializing': conversion from 'double' to 'unsigned int', possible loss of data
+q:\c++\rtl-sdr\radio\radio\radio.cpp(30): warning C4244: 'initializing': conversion from 'double' to 'unsigned int', possible loss of data
+q:\c++\rtl-sdr\radio\radio\radio.cpp(31): warning C4244: 'initializing': conversion from 'const double' to 'unsigned int', possible loss of data
+q:\c++\rtl-sdr\radio\radio\radio.cpp(32): warning C4244: 'initializing': conversion from 'const double' to 'unsigned int', possible loss of data
+q:\c++\rtl-sdr\radio\radio\radio.cpp(34): warning C4244: 'initializing': conversion from 'double' to 'unsigned int', possible loss of data
+q:\c++\rtl-sdr\radio\radio\radio.cpp(35): warning C4244: 'initializing': conversion from 'double' to 'unsigned int', possible loss of data
+q:\c++\rtl-sdr\radio\radio\radio.cpp(43): warning C4244: 'initializing': conversion from 'double' to 'unsigned int', possible loss of data
+q:\c++\rtl-sdr\radio\radio\radio.cpp(46): warning C4244: 'initializing': conversion from 'double' to 'unsigned int', possible loss of data
 q:\c++\rtl-sdr\radio\radio\radio.cpp(50): warning C4244: 'initializing': conversion from 'double' to 'unsigned int', possible loss of data
 q:\c++\rtl-sdr\radio\radio\radio.cpp(51): warning C4244: 'initializing': conversion from 'double' to 'unsigned int', possible loss of data
-q:\c++\rtl-sdr\radio\radio\radio.cpp(71): warning C4244: 'argument': conversion from 'double' to 'std::streamsize', possible loss of data
-q:\c++\rtl-sdr\radio\radio\radio.cpp(89): warning C4244: '=': conversion from 'double' to 'uint64_t', possible loss of data
-q:\c++\rtl-sdr\radio\radio\radio.cpp(128): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
-q:\c++\rtl-sdr\radio\radio\radio.cpp(151): warning C4244: '=': conversion from 'double' to 'sf::Int16', possible loss of data
-q:\c++\rtl-sdr\radio\radio\radio.cpp(152): warning C4244: '=': conversion from 'double' to 'sf::Int16', possible loss of data
-q:\c++\rtl-sdr\radio\radio\radio.cpp(155): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
-q:\c++\rtl-sdr\radio\radio\radio.cpp(221): warning C4715: 'MyStream::onGetData': not all control paths return a value
+q:\c++\rtl-sdr\radio\radio\radio.cpp(52): warning C4244: 'initializing': conversion from 'double' to 'unsigned int', possible loss of data
+q:\c++\rtl-sdr\radio\radio\radio.cpp(53): warning C4244: 'initializing': conversion from 'double' to 'unsigned int', possible loss of data
+q:\c++\rtl-sdr\radio\radio\radio.cpp(94): warning C4244: 'argument': conversion from 'double' to 'std::streamsize', possible loss of data
+q:\c++\rtl-sdr\radio\radio\radio.cpp(117): warning C4244: '=': conversion from 'double' to 'uint64_t', possible loss of data
+q:\c++\rtl-sdr\radio\radio\radio.cpp(156): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
+q:\c++\rtl-sdr\radio\radio\radio.cpp(180): warning C4244: '=': conversion from 'double' to 'sf::Int16', possible loss of data
+q:\c++\rtl-sdr\radio\radio\radio.cpp(181): warning C4244: '=': conversion from 'double' to 'sf::Int16', possible loss of data
+q:\c++\rtl-sdr\radio\radio\radio.cpp(183): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
+q:\c++\rtl-sdr\radio\radio\radio.cpp(247): warning C4715: 'MyStream::onGetData': not all control paths return a value
   RADIO.vcxproj -> Q:\c++\rtl-sdr\RADIO\Debug\RADIO.exe
   RADIO.vcxproj -> Q:\c++\rtl-sdr\RADIO\Debug\RADIO.pdb (Full PDB)
